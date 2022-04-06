@@ -8,12 +8,12 @@ namespace Sort {
 class SortRectangle : public sf::RectangleShape {
 private:
   int value;
-  int x;
+  float position;
   bool active;
 
 public:
   SortRectangle();
-  void setValues(sf::Vector2f);
+  void setValues(sf::Vector2f, float);
   void update();
   void setActive(bool);
 };

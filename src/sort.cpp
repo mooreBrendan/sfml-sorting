@@ -5,12 +5,12 @@ using namespace Sort;
 SortRectangle::SortRectangle() : sf::RectangleShape(sf::Vector2f(0, 0)) {}
 
 // initializes the values of the rectangle
-void SortRectangle::setValues(sf::Vector2f val) {
+void SortRectangle::setValues(sf::Vector2f val, float pos) {
   setSize(val);
   value = val.y;
   active = false;
-  x = val.x;
-  sf::Vector2f temp(x, val.y / 2);
+  position = pos;
+  sf::Vector2f temp(position, val.y / 2);
   setPosition(temp);
 }
 

@@ -22,12 +22,15 @@ int main() {
   Sort::SortRectangle arr[NUM_RECTS];
 
   // initialize an arrray of random rectangles
-  float rWidth = (window.getSize().x / NUM_RECTS) * .95;
+  float width = (window.getSize().x / NUM_RECTS);
   float height = window.getSize().y;
+  float rWidth = width * .95;
   float rHeight;
+  float pos;
   for (int i = 0; i < NUM_RECTS; i++) {
     rHeight = ((rand() % 100) * height) / 100;
-    arr[i].setValues(sf::Vector2f(rWidth, rHeight));
+    pos = i * width;
+    arr[i].setValues(sf::Vector2f(rWidth, rHeight), (pos + rWidth) / 2);
   }
 
   r = 0;
