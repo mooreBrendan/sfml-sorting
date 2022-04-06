@@ -13,9 +13,18 @@ private:
 
 public:
   SortRectangle();
-  void setValues(sf::Vector2f, float);
+  void setValues(sf::Vector2f, sf::Vector2f);
   void update();
   void setActive(bool);
+};
+
+class Button : public sf::RectangleShape {
+private:
+  sf::Text text;
+
+public:
+  Button(sf::Vector2f, sf::Vector2f, sf::Text);
+  bool isClicked(sf::Vector2f);
 };
 
 void quicksort(SortRectangle *, int);
