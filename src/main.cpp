@@ -18,6 +18,18 @@ int main() {
   sf::RenderWindow window(sf::VideoMode(640, 480), "Hello World");
   sf::CircleShape shape(200, 6);
 
+  // create an array of random rectangles
+  Sort::SortRectangle arr[NUM_RECTS];
+
+  // initialize an arrray of random rectangles
+  float rWidth = (window.getSize().x / NUM_RECTS) * .95;
+  float height = window.getSize().y;
+  float rHeight;
+  for (int i = 0; i < NUM_RECTS; i++) {
+    rHeight = ((rand() % 100) * height) / 100;
+    arr[i].setValues(sf::Vector2f(rWidth, rHeight));
+  }
+
   r = 0;
   g = 150;
   b = 250;

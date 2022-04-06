@@ -12,7 +12,8 @@ private:
   bool active;
 
 public:
-  SortRectangle(sf::Vector2f);
+  SortRectangle();
+  void setValues(sf::Vector2f);
   void update();
   void setActive(bool);
 };

@@ -2,20 +2,22 @@
 
 using namespace Sort;
 
-// class to handle each rectangle for sorting
-SortRectangle::SortRectangle(sf::Vector2f val) : sf::RectangleShape(val) {
+SortRectangle::SortRectangle() : sf::RectangleShape(sf::Vector2f(0, 0)) {}
+
+// initializes the values of the rectangle
+void SortRectangle::setValues(sf::Vector2f val) {
+  setSize(val);
   value = val.y;
   active = false;
   x = val.x;
+  sf::Vector2f temp(x, val.y / 2);
+  setPosition(temp);
 }
 
 // updates the color of the rectangle depending of if its active
 void SortRectangle::update() {
-  if (active) {
-    setFillColor(sf::Color::Red);
-  } else {
-    setFillColor(sf::Color::Blue);
-  }
+  sf::Color temp = active ? sf::Color::Red : sf::Color::Blue;
+  setFillColor(temp);
 }
 
 // sets if a rectangle is currently being accessed
