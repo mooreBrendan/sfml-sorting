@@ -6,13 +6,11 @@ OBJS = $(SRCS:%.c=%.o)
 
 all: compile link
 
-.c.o: 
-	$(GCC) -I include -I $(SFMLPath)/include -c $(SRCS)
 
 compile:
 	g++ -I include -I $(SFMLPath)/include -c $(SRCS)
 link:
-	g++ *.o -o $(FileName) -L $(SFMLPath)/lib -l sfml-graphics -l sfml-window -l sfml-system -l sfml-audio
+	g++ -o $(FileName) *.o -L $(SFMLPath)/lib -l sfml-audio -l sfml-graphics -l sfml-window -l sfml-system
 
 
 clean:

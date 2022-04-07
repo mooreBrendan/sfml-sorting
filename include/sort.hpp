@@ -3,19 +3,24 @@
 
 #include "main.hpp"
 
-namespace Sort {
+namespace SV {
 
 class SortRectangle : public sf::RectangleShape {
 private:
   int value;
   float position;
-  bool active;
+  int active;
 
 public:
   SortRectangle();
+  void swap(SortRectangle *);
   void setValues(sf::Vector2f, sf::Vector2f);
   void update();
-  void setActive(bool);
+  void setActive(int);
+  int getValue();
+  float getPos();
+  void setPos(float);
+  void print();
 };
 
 class Button : public sf::RectangleShape {
@@ -27,10 +32,10 @@ public:
   bool isClicked(sf::Vector2f);
 };
 
-void quicksort(SortRectangle *, int);
-void mergesort(SortRectangle *, int);
-void bubblesort(SortRectangle *, int);
-void insertionsort(SortRectangle *, int);
+void quicksort(SV::SortRectangle **, int);
+void mergesort(SV::SortRectangle **, int);
+void bubblesort(SV::SortRectangle **, int);
+void insertionsort(SV::SortRectangle **, int);
 }
 
 #endif
