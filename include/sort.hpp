@@ -28,8 +28,12 @@ private:
   sf::Text text;
 
 public:
-  Button(sf::Vector2f, sf::Vector2f, sf::Text);
-  bool isClicked(sf::Vector2f);
+  bool active;
+  Button(std::string);
+  sf::Text getText();
+  void setTextPos();
+  bool mouseOver(sf::Vector2i);
+  void mouseUpdate(sf::Vector2i);
 };
 
 void quicksort(SV::SortRectangle **, int);

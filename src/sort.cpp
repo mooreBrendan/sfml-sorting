@@ -126,20 +126,36 @@ void SV::insertionsort(SortRectangle **arr, int size) {
   }
 }
 
-Button::Button(sf::Vector2f size, sf::Vector2f pos, sf::Text txt)
-    : sf::RectangleShape(size) {
-  setPosition(pos);
-  text = txt;
-  text.setPosition(pos);
+Button::Button(std::string txt) : sf::RectangleShape(sf::Vector2f(0, 0)) {
+  text.setString(txt);
+  text.setPosition(sf::Vector2f(0, 0));
+  active = false;
 }
 
-bool Button::isClicked(sf::Vector2f click) {
+void Button::setTextPos() {
+  text.setPosition(getPosition());
+  sf::Vector2f temp = getSize();
+  temp.x /= 2;
+  temp.y /= 2;
+  text.move(temp);
+  text.setFillColor(sf::Color::Black);
+  text.setCharacterSize(30);
+}
+
+sf::Text Button::getText() { return text; }
+
+bool Button::mouseOver(sf::Vector2i mousePos) {
   sf::Vector2f pos = getPosition();
   sf::Vector2f size = getSize();
-  if (pos.x < click.x && click.x < pos.x + size.x) {
-    if (pos.y < click.y && click.y < pos.y + size.y) {
+  if (pos.x < mousePos.x && mousePos.x < pos.x + size.x) {
+    if (pos.y < mousePos.y && mousePos.y < pos.y + size.y) {
       return true;
     }
   }
   return false;
+}
+
+void Button::mouseUpdate(sf::Vector2i mousePos) {
+  sf::Color temp = mouseOver(mousePos) ? BUTTON_HOVER : BUTTON_NORMAL;
+  setFillColor(temp);
 }

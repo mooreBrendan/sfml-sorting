@@ -2,6 +2,9 @@
 #define MAIN_HPP
 
 #define NUM_RECTS 10
+#define NUM_BUTTONS 4
+#define BUTTON_NORMAL sf::Color(127, 127, 127, 255)
+#define BUTTON_HOVER sf::Color(100, 100, 100, 200)
 
 #include <iostream>
 

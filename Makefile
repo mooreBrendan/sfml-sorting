@@ -1,4 +1,4 @@
-FileName=Catan
+FileName=Sorting
 SFMLPath=D:/sfml
 
 SRCS = src/*.cpp

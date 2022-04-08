@@ -16,39 +16,73 @@ void initRectArray(SV::SortRectangle **arr, sf::Vector2u windowSize) {
   }
 }
 
+void initButtonArray(SV::Button *arr, sf::Vector2u windowSize) {
+  float width = windowSize.x * .75;
+  float height = windowSize.y / NUM_BUTTONS;
+  sf::Vector2f pos;
+  pos.x = (windowSize.x - width) / 2;
+  for (int i = 0; i < NUM_BUTTONS; i++) {
+    pos.y = height * i;
+    arr[i].setSize(sf::Vector2f(width, height * .95));
+    arr[i].setPosition(pos);
+    arr[i].setFillColor(BUTTON_NORMAL);
+    arr[i].setTextPos();
+  }
+}
+
 void clearRectArray(SV::SortRectangle **arr) {
   for (int i = NUM_RECTS - 1; i >= 0; i--) {
     delete arr[i];
   }
 }
 
-int buttonPress(sf::Vector2i click) {
-  // TODO: check which button was pressed and return correct value
-  return 1;
+int buttonPress(SV::Button *bArr, sf::Vector2i click) {
+  for (int i = 0; i < NUM_BUTTONS; i++) {
+    if (bArr[i].mouseOver(click)) {
+      return i + 1;
+    }
+  }
+  return 0;
 }
 
-void sortThread(SV::SortRectangle **arr) {
-  sf::Mouse mouse;
+void buttonArraySetActive(SV::Button *arr, bool state) {
+  for (int i = 0; i < NUM_BUTTONS; i++) {
+    arr[i].active = state;
+  }
+}
+
+void sortThread(SV::SortRectangle **rArr, SV::Button *bArr, sf::Mouse *mouse,
+                sf::RenderWindow *window, sf::Vector2i *click,
+                sf::Mutex *algoMut) {
   int algorithm = 0;
-  int count = 0;
-  while (count != 1) {
-    if (mouse.isButtonPressed(sf::Mouse::Left))
-      algorithm = buttonPress(mouse.getPosition());
+  while (true) {
+    buttonArraySetActive(bArr, true);
+    algoMut->lock();
+    if (click->x != 0) {
+      algorithm = buttonPress(bArr, *click);
+      std::cout << "called: " << algorithm << std::endl;
+      std::cout << "x: " << click->x << ", y: " << click->y << std::endl;
+      click->x = 0;
+      click->y = 0;
+    }
+    algoMut->unlock();
 
     switch (algorithm) {
     case 1:
-      SV::insertionsort(arr, NUM_RECTS);
-      std::cout << "done: " << count << std::endl;
-      count++;
+      buttonArraySetActive(bArr, false);
+      SV::quicksort(rArr, NUM_RECTS);
       break;
     case 2:
-      SV::bubblesort(arr, NUM_RECTS);
+      buttonArraySetActive(bArr, false);
+      SV::mergesort(rArr, NUM_RECTS);
       break;
     case 3:
-      SV::mergesort(arr, NUM_RECTS);
+      buttonArraySetActive(bArr, false);
+      SV::bubblesort(rArr, NUM_RECTS);
       break;
     case 4:
-      SV::quicksort(arr, NUM_RECTS);
+      buttonArraySetActive(bArr, false);
+      SV::insertionsort(rArr, NUM_RECTS);
       break;
 
     default:
@@ -59,30 +93,63 @@ void sortThread(SV::SortRectangle **arr) {
 }
 
 int main() {
-  float elapsedTime;
   std::srand(time(NULL));
+
+  sf::Mouse mouse;
   sf::RenderWindow window(sf::VideoMode(640, 480), "Sorting Algorithms");
+  sf::Mutex algoMut;
+
+  int algorithm;
+  int state = 0;
+  sf::Vector2i click;
 
   // create an array of random rectangles
-  SV::SortRectangle *arr[NUM_RECTS];
+  SV::SortRectangle *rects[NUM_RECTS];
+  initRectArray(rects, window.getSize());
 
-  initRectArray(arr, window.getSize());
+  // array to store the buttons in the game
+  SV::Button buttons[] = {SV::Button("Quick Sort"), SV::Button("Merge Sort"),
+                          SV::Button("Bubble Sort"),
+                          SV::Button("Insertion Sort")};
+  initButtonArray(buttons, window.getSize());
 
-  sf::Thread thread(&sortThread, arr);
+  // start theread for sorting
+  sf::Thread thread(std::bind(&sortThread, rects, buttons, &mouse, &window,
+                              &click, &algoMut));
   thread.launch();
   while (window.isOpen()) {
     sf::Event event;
+    click.x = 0;
+    click.y = 0;
     while (window.pollEvent(event)) {
       if (event.type == sf::Event::Closed) {
-        window.close();
         thread.terminate();
+        for (int i = NUM_RECTS; i >= 0; i--) {
+          delete rects[i];
+        }
+        window.close();
+      } else if (event.type == sf::Event::MouseButtonPressed) {
+        if (event.mouseButton.button == sf::Mouse::Left) {
+          algoMut.lock();
+          click.x = event.mouseButton.x;
+          click.y = event.mouseButton.y;
+          std::cout << "CLICK x: " << click.x << ", y: " << click.y
+                    << std::endl;
+          algoMut.unlock();
+        }
       }
     }
-
     window.clear();
     for (int i = 0; i < NUM_RECTS; i++) {
-      arr[i]->update();
-      window.draw(*(arr[i]));
+      rects[i]->update();
+      window.draw(*(rects[i]));
+    }
+    for (int i = 0; i < NUM_BUTTONS; i++) {
+      if (buttons[i].active) {
+        buttons[i].mouseUpdate(mouse.getPosition(window));
+        window.draw(buttons[i]);
+        window.draw(buttons[i].getText());
+      }
     }
     window.display();
   }
