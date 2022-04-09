@@ -6,12 +6,12 @@
 namespace SV {
 
 class SortRectangle : public sf::RectangleShape {
-private:
+ private:
   int value;
   float position;
   int active;
 
-public:
+ public:
   SortRectangle();
   void swap(SortRectangle *);
   void setValues(sf::Vector2f, sf::Vector2f);
@@ -24,18 +24,19 @@ public:
 };
 
 class Button : public sf::RectangleShape {
-private:
+ private:
   sf::Text text;
 
-public:
+ public:
   bool active;
   Button(std::string);
   sf::Text getText();
-  void setTextPos();
+  void setTextFormat();
   bool mouseOver(sf::Vector2i);
   void mouseUpdate(sf::Vector2i);
 };
 
+// sort algorithms
 void quicksort(SV::SortRectangle **, int);
 void mergesort(SV::SortRectangle **, int);
 void bubblesort(SV::SortRectangle **, int);
