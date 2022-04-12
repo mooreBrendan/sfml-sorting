@@ -80,7 +80,7 @@ void SortRectangle::swap(SortRectangle *s) {
   float temp = getPosition().x;
   setPos(s->getPos());
   s->setPos(temp);
-  sf::sleep(sf::milliseconds(100));
+  sf::sleep(DISPLAY_DELAY);
 
 #ifdef DEBUG
   std::cout << "s1: ";
@@ -119,7 +119,25 @@ void SV::quicksort(SortRectangle **arr, int size) {}
 void SV::mergesort(SortRectangle **arr, int size) {}
 
 // performs the bubble sort algorithm
-void SV::bubblesort(SortRectangle **arr, int size) {}
+void SV::bubblesort(SortRectangle **arr, int size) {
+  SortRectangle *temp;
+  for (int i = 0; i < size - 1; i++) {
+    for (int j = 0; j < size - 1; j++) {  // mark rectangles as being referenced
+      arr[j]->setActive(1);
+      arr[j + 1]->setActive(1);
+      if (arr[j]->getValue() > arr[j + 1]->getValue()) {
+        arr[j]->swap(arr[j + 1]);
+        temp = arr[j];
+        arr[j] = arr[j + 1];
+        arr[j + 1] = temp;
+      } else {
+        sf::sleep(DISPLAY_DELAY);
+      }
+      arr[j]->setActive(0);
+    }
+    arr[size - 1]->setActive(0);
+  }
+}
 
 // performs the insertion sort algorithm
 void SV::insertionsort(SortRectangle **arr, int size) {
@@ -148,7 +166,7 @@ void SV::insertionsort(SortRectangle **arr, int size) {
         arr[i] = arr[j];
         arr[j] = temp;
       } else {
-        sf::sleep(sf::milliseconds(100));
+        sf::sleep(DISPLAY_DELAY);
       }
 
 #ifdef DEBUG
