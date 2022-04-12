@@ -1,18 +1,28 @@
-FileName=Sorting
+EXE_NAME=Sorting
 SFMLPath=D:/sfml
 
+DEBUG_FLAGS = -DDEBUG
+
 SRCS = src/*.cpp
-OBJS = $(SRCS:%.c=%.o)
+includes = -I include -I $(SFMLPath)/include
+libs = -L $(SFMLPath)/lib
+links = -l sfml-audio -l sfml-graphics -l sfml-window -l sfml-system
+OBJS = $(SRCS:%.cpp=%.o)
 
 all: compile link
 
+remake: clean all
+remake-debug: clean debug link
+
+debug:
+	g++ $(includes) -c $(SRCS) $(DEBUG_FLAGS)
 
 compile:
-	g++ -I include -I $(SFMLPath)/include -c $(SRCS)
+	g++ $(includes) -c $(SRCS)
 link:
-	g++ -o $(FileName) *.o -L $(SFMLPath)/lib -l sfml-audio -l sfml-graphics -l sfml-window -l sfml-system
+	g++ -o $(EXE_NAME) *.o $(libs) $(links)
 
 
 clean:
-	del .\$(FileName).exe
+	del .\$(EXE_NAME).exe
 	del *.o

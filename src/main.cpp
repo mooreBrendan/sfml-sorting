@@ -76,8 +76,10 @@ void sortThread(SV::SortRectangle **rArr, SV::Button *bArr, sf::Mouse *mouse,
     algoMut->lock();
     if (click->x != 0) {
       algorithm = buttonPress(bArr, *click);
+#ifdef DEBUG
       std::cout << "called: " << algorithm << std::endl;
       std::cout << "x: " << click->x << ", y: " << click->y << std::endl;
+#endif
       click->x = 0;
       click->y = 0;
     }
@@ -134,6 +136,8 @@ int main() {
                               &click, &algoMut));
   thread.launch();
 
+  window.setFramerateLimit(60);
+
   // main loop
   while (window.isOpen()) {
     // reset variables
@@ -152,27 +156,31 @@ int main() {
           algoMut.lock();
           click.x = event.mouseButton.x;
           click.y = event.mouseButton.y;
+#ifdef DEBUG
           std::cout << "CLICK x: " << click.x << ", y: " << click.y
                     << std::endl;
+#endif
           algoMut.unlock();
         }
       }
     }
 
-    // perform draw
-    window.clear();
-    for (int i = 0; i < NUM_RECTS; i++) {
-      rects[i]->update();
-      window.draw(*(rects[i]));
-    }
-    for (int i = 0; i < NUM_BUTTONS; i++) {
-      if (buttons[i].active) {  // only draw buttons if active
-        buttons[i].mouseUpdate(mouse.getPosition(window));  // check mouse hover
-        window.draw(buttons[i]);
-        window.draw(buttons[i].getText());
+    if (window.isOpen()) {  // make sure window wasn't closed
+      // perform draw
+      window.clear();
+      for (int i = 0; i < NUM_RECTS; i++) {
+        rects[i]->update();
+        window.draw(*(rects[i]));
       }
+      for (int i = 0; i < NUM_BUTTONS; i++) {
+        if (buttons[i].active) {  // only draw buttons if active
+          buttons[i].mouseUpdate(mouse.getPosition(window));  // if mouse over
+          window.draw(buttons[i]);
+          window.draw(*(buttons[i].getText()));
+        }
+      }
+      window.display();
     }
-    window.display();
   }
   return 0;
 }

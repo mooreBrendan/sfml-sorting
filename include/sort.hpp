@@ -26,11 +26,12 @@ class SortRectangle : public sf::RectangleShape {
 class Button : public sf::RectangleShape {
  private:
   sf::Text text;
+  sf::Font font;
 
  public:
   bool active;
   Button(std::string);
-  sf::Text getText();
+  sf::Text *getText();
   void setTextFormat();
   bool mouseOver(sf::Vector2i);
   void mouseUpdate(sf::Vector2i);

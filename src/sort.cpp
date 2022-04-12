@@ -139,8 +139,15 @@ void SV::insertionsort(SortRectangle **arr, int size) {
 
 // class to handle a button
 Button::Button(std::string txt) : sf::RectangleShape(sf::Vector2f(0, 0)) {
+  if (!font.loadFromFile("Roboto-Regular.ttf")) {
+    std::cout << "could not find font file\n" << std::endl;
+    throw 20;
+  }
+  text.setFont(font);
   text.setString(txt);
-  text.setPosition(sf::Vector2f(0, 0));
+  text.setPosition(getPosition());
+  text.setFillColor(sf::Color::Black);
+  text.setCharacterSize(FONT_SIZE);
   active = false;
 }
 
@@ -148,26 +155,33 @@ Button::Button(std::string txt) : sf::RectangleShape(sf::Vector2f(0, 0)) {
 void Button::setTextFormat() {
   // move text to the center of the button
   text.setPosition(getPosition());
+#ifdef DEBUG
+  std::cout << text.getString().toAnsiString() << std::endl;
+  sf::Vector2f disp = text.getPosition();
+  std::cout << "text: x: " << disp.x << ", y: " << disp.y << std::endl;
+#endif
+
   sf::Vector2f temp = getSize();
-  temp.x /= 2;
-  temp.y /= 2;
+  sf::FloatRect textBox = text.getLocalBounds();
+  temp.x = (temp.x / 2) - (textBox.width / 2);
+  temp.y = (temp.y / 2) - (textBox.height / 2);
   text.move(temp);
 
-  // set other text options
-  text.setFillColor(sf::Color::Black);
-  text.setCharacterSize(30);
+#ifdef DEBUG
+  disp = text.getPosition();
+  std::cout << "text: x: " << disp.x << ", y: " << disp.y << std::endl;
+#endif
 }
 
 // returns the text element (for rendering)
-sf::Text Button::getText() { return text; }
+sf::Text *Button::getText() { return &text; }
 
 // determines if the mouse is over the button or not
 bool Button::mouseOver(sf::Vector2i mousePos) {
   sf::Vector2f pos = getPosition();
   sf::Vector2f size = getSize();
-  if (pos.x < mousePos.x && mousePos.x < pos.x + size.x) {  // check x in range
-    if (pos.y < mousePos.y &&
-        mousePos.y < pos.y + size.y) {  // check y in range
+  if (pos.x < mousePos.x && mousePos.x < pos.x + size.x) {    // check x inside
+    if (pos.y < mousePos.y && mousePos.y < pos.y + size.y) {  // check y inside
       return true;
     }
   }
