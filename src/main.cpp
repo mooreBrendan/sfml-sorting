@@ -79,6 +79,7 @@ void sortThread(SV::SortRectangle **rArr, SV::Button *bArr, sf::Mouse *mouse,
 #ifdef DEBUG
       std::cout << "called: " << algorithm << std::endl;
       std::cout << "x: " << click->x << ", y: " << click->y << std::endl;
+      std::cout << std::endl << std::endl << std::endl;
 #endif
       click->x = 0;
       click->y = 0;
