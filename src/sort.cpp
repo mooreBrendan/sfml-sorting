@@ -69,7 +69,7 @@ void SortRectangle::swap(SortRectangle *s) {
   // show the rectangles as being swapped
   setActive(2);
   s->setActive(2);
-#ifdef DEBUG
+#ifdef SWAP_DEBUG
   std::cout << "s1: ";
   print();
   std::cout << "s2: ";
@@ -82,7 +82,7 @@ void SortRectangle::swap(SortRectangle *s) {
   s->setPos(temp);
   sf::sleep(DISPLAY_DELAY);
 
-#ifdef DEBUG
+#ifdef SWAP_DEBUG
   std::cout << "s1: ";
   print();
   std::cout << "s2: ";
@@ -122,8 +122,99 @@ void swap(SortRectangle **a, SortRectangle **b) {
   *b = temp;
 }
 
+int findMid(SortRectangle **arr, int a, int b, int c) {
+#ifdef DEBUG
+  std::cout << "partitioning: ";
+  std::cout << "a: " << a << ", a-val: " << arr[a]->getValue() << ", ";
+  std::cout << "b: " << b << ", b-val: " << arr[b]->getValue() << ", ";
+  std::cout << "c: " << c << ", c-val: " << arr[c]->getValue() << std::endl;
+#endif
+
+  // get temporary values (only care about signs)
+  int tmp1 = arr[a]->getValue() > arr[b]->getValue();
+  int tmp2 = arr[b]->getValue() > arr[c]->getValue();
+  int tmp3 = arr[a]->getValue() > arr[c]->getValue();
+
+  if (tmp1 == tmp2) {  // a>b>c || c>=b>=a
+    return b;
+  } else if (tmp1 == tmp3) {  // a>b & b>c not same sign, so a>c>b || b>=c>=a
+    return c;
+  } else {  // only other option
+    return a;
+  }
+}
+
+int partition(SortRectangle **arr, int start, int size) {
+  int pivot = findMid(arr, start, start + (size / 2), start + size - 1);
+  int pValue = arr[pivot]->getValue();
+  int partionIndex = start;
+#ifdef DEBUG
+  yellow();
+  std::cout << "start partition ";
+  std::cout << "start: " << start << ", size: " << size;
+  std::cout << ", pivot: " << pivot << ", pval: " << pValue << std::endl;
+  reset();
+#endif
+
+  for (int i = start; i < start + size; i++) {  // for each
+    // if less than pivot, swap to left and increase partition
+    arr[i]->setActive(1);
+    if (arr[i]->getValue() < pValue) {
+      if (i != partionIndex) {  // if already in position
+#ifdef DEBUG
+        green();
+        std::cout << "swapping: i: " << i << ", pIndex: " << partionIndex
+                  << std::endl;
+        reset();
+#endif
+        swap(&(arr[i]), &(arr[partionIndex]));
+        if (partionIndex == pivot) {
+          pivot = i;
+        }
+      } else {
+        sf::sleep(DISPLAY_DELAY);
+      }
+
+      partionIndex++;
+    } else {
+      sf::sleep(DISPLAY_DELAY);
+    }
+    arr[i]->setActive(0);
+  }
+  swap(&(arr[partionIndex]), &(arr[pivot]));
+#ifdef DEBUG
+  yellow();
+  std::cout << "done partion: start: " << start << ", size: " << size;
+  std::cout << ": partition index: " << partionIndex << std::endl;
+  reset();
+#endif
+  return partionIndex;
+}
+
+void quicksortRecursive(SortRectangle **arr, int start, int size) {
+#ifdef DEBUG
+  cyan();
+  std::cout << "recurse-start index: " << start;
+  std::cout << ",size: " << size << std::endl;
+  reset();
+#endif
+  if (size > 1) {
+    int part = partition(arr, start, size);
+    quicksortRecursive(arr, start, part - start);
+    quicksortRecursive(arr, part + 1, (size + start) - part - 1);
+  }
+#ifdef DEBUG
+  cyan();
+  std::cout << "recurse-stop index: " << start;
+  std::cout << ",size: " << size << std::endl;
+  reset();
+#endif
+}
+
 // performs the quick sort algorithm
-void quicksort(SortRectangle **arr, int size) {}
+void quicksort(SortRectangle **arr, int size) {
+  quicksortRecursive(arr, 0, size);
+}
 
 void mergesortRecursive(SortRectangle **a, int index, int size) {
 #ifdef DEBUG

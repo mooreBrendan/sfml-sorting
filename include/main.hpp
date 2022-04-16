@@ -17,5 +17,6 @@
 #include <SFML/System.hpp>
 
 #include "sort.hpp"
+#include "util.hpp"
 
 #endif
