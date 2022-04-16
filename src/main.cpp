@@ -25,8 +25,7 @@ int main() {
   sf::Vector2i click;
 
   // create an array of random rectangles
-  SV::SortRectangle *rects[NUM_RECTS];
-  initRectArray(rects, window.getSize());
+  SV::SortRectangle *rects[NUM_RECTS] = {nullptr};
 
   // array to store the buttons in the game
   SV::Button buttons[] = {SV::Button("Quick Sort"), SV::Button("Merge Sort"),
@@ -72,8 +71,10 @@ int main() {
       // perform draw
       window.clear();
       for (int i = 0; i < NUM_RECTS; i++) {
-        rects[i]->update();
-        window.draw(*(rects[i]));
+        if (rects[i] != nullptr) {
+          rects[i]->update();
+          window.draw(*(rects[i]));
+        }
       }
       for (int i = 0; i < NUM_BUTTONS; i++) {
         if (buttons[i].active) {  // only draw buttons if active

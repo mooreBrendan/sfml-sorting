@@ -346,7 +346,7 @@ void insertionsort(SortRectangle **arr, int size) {
 ▐░░░░░░░░░░▌ ▐░░░░░░░░░░░▌     ▐░▌          ▐░▌     ▐░░░░░░░░░░░▌▐░▌      ▐░░▌
  ▀▀▀▀▀▀▀▀▀▀   ▀▀▀▀▀▀▀▀▀▀▀       ▀            ▀       ▀▀▀▀▀▀▀▀▀▀▀  ▀        ▀▀
 *****************************************************************************/
-
+// TODO: fix mouse hover and click
 // class to handle a button
 Button::Button(std::string txt) : sf::RectangleShape(sf::Vector2f(0, 0)) {
   if (!font.loadFromFile("Roboto-Regular.ttf")) {

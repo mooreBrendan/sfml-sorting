@@ -3,10 +3,10 @@
 // initialize an arrray of random rectangles
 void initRectArray(SV::SortRectangle **arr, sf::Vector2u windowSize) {
   // get basic size information
-  float width = windowSize.x / NUM_RECTS;  // width of each subsection
-  float height = windowSize.y;             // screen height
-  float rWidth = width * .95;              // width of bar with room between
-  float rHeight;  // variable to temporarily store bar height
+  float width = (float)windowSize.x / NUM_RECTS;  // width of each subsection
+  float height = windowSize.y;                    // screen height
+  float rWidth = width * .95;  // width of bar with room between
+  float rHeight;               // variable to temporarily store bar height
   sf::Vector2f pos;
 
   // perform initialization for each rectangle
@@ -64,6 +64,14 @@ void buttonArraySetActive(SV::Button *arr, bool state) {
   }
 }
 
+// clears the previous set of rectangles and initializes a new set
+void algPrep(SV::SortRectangle **rArr, SV::Button *bArr,
+             sf::Vector2u windowSize) {
+  clearRectArray(rArr);
+  initRectArray(rArr, windowSize);
+  buttonArraySetActive(bArr, false);
+}
+
 // thread function to handle selection of sorting algorithms
 void sortThread(SV::SortRectangle **rArr, SV::Button *bArr, sf::Mouse *mouse,
                 sf::RenderWindow *window, sf::Vector2i *click,
@@ -89,19 +97,19 @@ void sortThread(SV::SortRectangle **rArr, SV::Button *bArr, sf::Mouse *mouse,
     // determine which algorithm has been selected
     switch (algorithm) {
       case 1:
-        buttonArraySetActive(bArr, false);
+        algPrep(rArr, bArr, window->getSize());
         SV::quicksort(rArr, NUM_RECTS);
         break;
       case 2:
-        buttonArraySetActive(bArr, false);
+        algPrep(rArr, bArr, window->getSize());
         SV::mergesort(rArr, NUM_RECTS);
         break;
       case 3:
-        buttonArraySetActive(bArr, false);
+        algPrep(rArr, bArr, window->getSize());
         SV::bubblesort(rArr, NUM_RECTS);
         break;
       case 4:
-        buttonArraySetActive(bArr, false);
+        algPrep(rArr, bArr, window->getSize());
         SV::insertionsort(rArr, NUM_RECTS);
         break;
 
