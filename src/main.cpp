@@ -67,20 +67,18 @@ int main() {
         }
       } else if (event.type == sf::Event::Resized) {
         sf::Vector2f resize(event.size.width, event.size.height);
-        sf::Vector2f scale(window.getSize().x / resize.x,
-                           window.getSize().y / resize.y);
+        sf::Vector2f scale((float)window.getSize().x / resize.x,
+                           (float)window.getSize().y / resize.y);
         view.setSize(resize);
         view.setCenter(resize.x / 2.0f, resize.y / 2.0f);
 #ifdef DEBUG
         std::cout << "resize: x: " << resize.x << ", y: " << resize.y;
-        std::cout << "scale: x: " << scale.x << ", y: " << scale.y;
+        std::cout << " scale: x: " << scale.x << ", y: " << scale.y;
         std::cout << std::endl;
 #endif
         window.setView(view);
-        // TODO: update buttons and rectangles for window updates
-        // for (int i = 0; i < NUM_BUTTONS; i++) {
-        //   buttons[i].scale(scale);
-        // }
+        initButtonArray(buttons, window.getSize());
+        scaleRectArray(rects, window.getSize());
       }
     }
 

@@ -17,12 +17,13 @@ using namespace SV;
 *****************************************************************************/
 
 // class to represent a bar in a sorting algorithm demonstration
-SortRectangle::SortRectangle() : sf::RectangleShape(sf::Vector2f(0, 0)) {}
+SortRectangle::SortRectangle() : sf::RectangleShape(sf::Vector2f(0, 0)) {
+  value = rand() % 100;
+}
 
 // initializes the values of the rectangle
-void SortRectangle::setValues(sf::Vector2f val, sf::Vector2f pos) {
-  setSize(val);
-  value = val.y;
+void SortRectangle::setValues(sf::Vector2f size, sf::Vector2f pos) {
+  setSize(size);
   active = 0;
   position = pos.x;
   sf::Vector2f temp(pos);
@@ -346,7 +347,6 @@ void insertionsort(SortRectangle **arr, int size) {
 ▐░░░░░░░░░░▌ ▐░░░░░░░░░░░▌     ▐░▌          ▐░▌     ▐░░░░░░░░░░░▌▐░▌      ▐░░▌
  ▀▀▀▀▀▀▀▀▀▀   ▀▀▀▀▀▀▀▀▀▀▀       ▀            ▀       ▀▀▀▀▀▀▀▀▀▀▀  ▀        ▀▀
 *****************************************************************************/
-// TODO: fix mouse hover and click
 // class to handle a button
 Button::Button(std::string txt) : sf::RectangleShape(sf::Vector2f(0, 0)) {
   if (!font.loadFromFile("Roboto-Regular.ttf")) {

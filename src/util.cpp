@@ -2,23 +2,31 @@
 
 // initialize an arrray of random rectangles
 void initRectArray(SV::SortRectangle **arr, sf::Vector2u windowSize) {
-  // get basic size information
+  for (int i = 0; i < NUM_RECTS; i++) {
+    // create the array
+    arr[i] = new SV::SortRectangle();
+  }
+
+  scaleRectArray(arr, windowSize);
+}
+
+void scaleRectArray(SV::SortRectangle **arr, sf::Vector2u windowSize) {
   float width = (float)windowSize.x / NUM_RECTS;  // width of each subsection
   float height = windowSize.y;                    // screen height
   float rWidth = width * .95;  // width of bar with room between
   float rHeight;               // variable to temporarily store bar height
+  int val;
   sf::Vector2f pos;
 
   // perform initialization for each rectangle
   for (int i = 0; i < NUM_RECTS; i++) {
-    // get random value for the rectangle height and find widht
-    rHeight = (((rand() % 100) * height) / 100) + 1;
-    pos.x = i * width;
-    pos.y = height - rHeight;
-
-    // create rectangle and store values
-    arr[i] = new SV::SortRectangle();
-    arr[i]->setValues(sf::Vector2f(rWidth, rHeight), pos);
+    if (arr[i] != nullptr) {
+      // get random value for the rectangle height and find width
+      rHeight = ((arr[i]->getValue() * height) / 100) + 1;
+      pos.x = i * width;
+      pos.y = height - rHeight;
+      arr[i]->setValues(sf::Vector2f(rWidth, rHeight), pos);
+    }
   }
 }
 

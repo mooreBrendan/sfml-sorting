@@ -5,6 +5,7 @@
 
 void initRectArray(SV::SortRectangle **, sf::Vector2u);
 void initButtonArray(SV::Button *, sf::Vector2u);
+void scaleRectArray(SV::SortRectangle **, sf::Vector2u);
 void clearRectArray(SV::SortRectangle **);
 int buttonPress(SV::Button *, sf::Vector2i);
 void buttonArraySetActive(SV::Button *, bool);
