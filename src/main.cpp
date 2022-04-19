@@ -23,6 +23,7 @@ int main() {
   sf::RenderWindow window(sf::VideoMode(640, 480), "Sorting Algorithms");
   sf::Mutex algoMut;
   sf::Vector2i click;
+  sf::View view = window.getView();
 
   // create an array of random rectangles
   SV::SortRectangle *rects[NUM_RECTS] = {nullptr};
@@ -56,14 +57,30 @@ int main() {
       } else if (event.type == sf::Event::MouseButtonPressed) {  // check mouse
         if (event.mouseButton.button == sf::Mouse::Left) {  // check left mouse
           algoMut.lock();
-          click.x = event.mouseButton.x;
-          click.y = event.mouseButton.y;
+          sf::Vector2f clickRaw(event.mouseButton.x, event.mouseButton.y);
+          click = window.mapCoordsToPixel(clickRaw);
 #ifdef DEBUG
           std::cout << "CLICK x: " << click.x << ", y: " << click.y
                     << std::endl;
 #endif
           algoMut.unlock();
         }
+      } else if (event.type == sf::Event::Resized) {
+        sf::Vector2f resize(event.size.width, event.size.height);
+        sf::Vector2f scale(window.getSize().x / resize.x,
+                           window.getSize().y / resize.y);
+        view.setSize(resize);
+        view.setCenter(resize.x / 2.0f, resize.y / 2.0f);
+#ifdef DEBUG
+        std::cout << "resize: x: " << resize.x << ", y: " << resize.y;
+        std::cout << "scale: x: " << scale.x << ", y: " << scale.y;
+        std::cout << std::endl;
+#endif
+        window.setView(view);
+        // TODO: update buttons and rectangles for window updates
+        // for (int i = 0; i < NUM_BUTTONS; i++) {
+        //   buttons[i].scale(scale);
+        // }
       }
     }
 
