@@ -7,6 +7,8 @@
 #define BUTTON_HOVER sf::Color(100, 100, 100, 200)
 #define FONT_SIZE 30
 #define DISPLAY_DELAY sf::milliseconds(100)
+#define MIN_X_SIZE 360
+#define MIN_Y_SIZE 240
 
 #include <iostream>
 

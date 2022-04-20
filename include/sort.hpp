@@ -13,10 +13,11 @@ class SortRectangle : public sf::RectangleShape {
 
  public:
   SortRectangle();
-  void swap(SortRectangle *);
+  void swap(SortRectangle *, sf::Mutex *);
+  int compare(SortRectangle *, sf::Mutex *);
   void setValues(sf::Vector2f, sf::Vector2f);
   void update();
-  void setActive(int);
+  void setActive(int, sf::Mutex *);
   int getValue();
   float getPos();
   void setPos(float);
@@ -38,10 +39,10 @@ class Button : public sf::RectangleShape {
 };
 
 // sort algorithms
-void quicksort(SV::SortRectangle **, int);
-void mergesort(SV::SortRectangle **, int);
-void bubblesort(SV::SortRectangle **, int);
-void insertionsort(SV::SortRectangle **, int);
+void quicksort(SV::SortRectangle **, int, sf::Mutex *);
+void mergesort(SV::SortRectangle **, int, sf::Mutex *);
+void bubblesort(SV::SortRectangle **, int, sf::Mutex *);
+void insertionsort(SV::SortRectangle **, int, sf::Mutex *);
 }
 
 #endif

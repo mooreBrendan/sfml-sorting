@@ -67,30 +67,37 @@ int main() {
         }
       } else if (event.type == sf::Event::Resized) {
         sf::Vector2f resize(event.size.width, event.size.height);
-        sf::Vector2f scale((float)window.getSize().x / resize.x,
-                           (float)window.getSize().y / resize.y);
+
+        // set minimum size
+        resize.x = resize.x < MIN_X_SIZE ? MIN_X_SIZE : resize.x;
+        resize.y = resize.y < MIN_Y_SIZE ? MIN_Y_SIZE : resize.y;
+
+        window.setSize(sf::Vector2u(resize.x, resize.y));
         view.setSize(resize);
         view.setCenter(resize.x / 2.0f, resize.y / 2.0f);
 #ifdef DEBUG
         std::cout << "resize: x: " << resize.x << ", y: " << resize.y;
-        std::cout << " scale: x: " << scale.x << ", y: " << scale.y;
         std::cout << std::endl;
 #endif
         window.setView(view);
+        algoMut.lock();
         initButtonArray(buttons, window.getSize());
         scaleRectArray(rects, window.getSize());
+        algoMut.unlock();
       }
     }
 
     if (window.isOpen()) {  // make sure window wasn't closed
       // perform draw
       window.clear();
+      algoMut.lock();
       for (int i = 0; i < NUM_RECTS; i++) {
         if (rects[i] != nullptr) {
           rects[i]->update();
           window.draw(*(rects[i]));
         }
       }
+      algoMut.unlock();
       for (int i = 0; i < NUM_BUTTONS; i++) {
         if (buttons[i].active) {  // only draw buttons if active
           buttons[i].mouseUpdate(mouse.getPosition(window));  // if mouse over

@@ -66,10 +66,10 @@ void SortRectangle::print() {
   std::cout << "x:" << x << ",y: " << y << std::endl;
 }
 
-void SortRectangle::swap(SortRectangle *s) {
+void SortRectangle::swap(SortRectangle *s, sf::Mutex *mut) {
   // show the rectangles as being swapped
-  setActive(2);
-  s->setActive(2);
+  setActive(2, mut);
+  s->setActive(2, mut);
 #ifdef SWAP_DEBUG
   std::cout << "s1: ";
   print();
@@ -77,10 +77,12 @@ void SortRectangle::swap(SortRectangle *s) {
   s->print();
 #endif
 
+  mut->lock();
   // swap their positions on screen
   float temp = getPosition().x;
   setPos(s->getPos());
   s->setPos(temp);
+  mut->unlock();
   sf::sleep(DISPLAY_DELAY);
 
 #ifdef SWAP_DEBUG
@@ -90,14 +92,34 @@ void SortRectangle::swap(SortRectangle *s) {
   s->print();
 #endif
   // set the rectangles as not being swapped
-  setActive(0);
-  s->setActive(0);
+  setActive(0, mut);
+  s->setActive(0, mut);
+}
+
+// thread safe compare two rectangles (-1:less,0:equal,1:greater)
+int SortRectangle::compare(SortRectangle *other, sf::Mutex *mut) {
+  int out = 0;
+  mut->lock();
+  if (value < other->getValue()) {
+    out = -1;
+  } else if (value == other->getValue()) {
+    out = 0;
+  } else {
+    out = 1;
+  }
+
+  mut->unlock();
+  return out;
 }
 
 int SortRectangle::getValue() { return value; }
 
 // sets if a rectangle is currently being accessed
-void SortRectangle::setActive(int act) { active = act; }
+void SortRectangle::setActive(int act, sf::Mutex *mut) {
+  mut->lock();
+  active = act;
+  mut->unlock();
+}
 
 /*****************************************************************************
  ▄▄▄▄▄▄▄▄▄▄▄  ▄            ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄
@@ -116,11 +138,13 @@ void SortRectangle::setActive(int act) { active = act; }
 namespace SV {
 
 // swaps the memory addresses of two rectangles
-void swap(SortRectangle **a, SortRectangle **b) {
-  (*a)->swap(*b);
+void swap(SortRectangle **a, SortRectangle **b, sf::Mutex *mut) {
+  (*a)->swap(*b, mut);
+  mut->lock();
   SortRectangle *temp = *a;
   *a = *b;
   *b = temp;
+  mut->unlock();
 }
 
 int findMid(SortRectangle **arr, int a, int b, int c) {
@@ -145,7 +169,7 @@ int findMid(SortRectangle **arr, int a, int b, int c) {
   }
 }
 
-int partition(SortRectangle **arr, int start, int size) {
+int partition(SortRectangle **arr, int start, int size, sf::Mutex *algoMut) {
   int pivot = findMid(arr, start, start + (size / 2), start + size - 1);
   int pValue = arr[pivot]->getValue();
   int partionIndex = start;
@@ -159,8 +183,10 @@ int partition(SortRectangle **arr, int start, int size) {
 
   for (int i = start; i < start + size; i++) {  // for each
     // if less than pivot, swap to left and increase partition
-    arr[i]->setActive(1);
+    arr[i]->setActive(1, algoMut);
+    algoMut->lock();
     if (arr[i]->getValue() < pValue) {
+      algoMut->unlock();
       if (i != partionIndex) {  // if already in position
 #ifdef DEBUG
         green();
@@ -168,7 +194,7 @@ int partition(SortRectangle **arr, int start, int size) {
                   << std::endl;
         reset();
 #endif
-        swap(&(arr[i]), &(arr[partionIndex]));
+        swap(&(arr[i]), &(arr[partionIndex]), algoMut);
         if (partionIndex == pivot) {
           pivot = i;
         }
@@ -178,11 +204,12 @@ int partition(SortRectangle **arr, int start, int size) {
 
       partionIndex++;
     } else {
+      algoMut->unlock();
       sf::sleep(DISPLAY_DELAY);
     }
-    arr[i]->setActive(0);
+    arr[i]->setActive(0, algoMut);
   }
-  swap(&(arr[partionIndex]), &(arr[pivot]));
+  swap(&(arr[partionIndex]), &(arr[pivot]), algoMut);
 #ifdef DEBUG
   yellow();
   std::cout << "done partion: start: " << start << ", size: " << size;
@@ -192,7 +219,8 @@ int partition(SortRectangle **arr, int start, int size) {
   return partionIndex;
 }
 
-void quicksortRecursive(SortRectangle **arr, int start, int size) {
+void quicksortRecursive(SortRectangle **arr, int start, int size,
+                        sf::Mutex *algoMut) {
 #ifdef DEBUG
   cyan();
   std::cout << "recurse-start index: " << start;
@@ -200,9 +228,9 @@ void quicksortRecursive(SortRectangle **arr, int start, int size) {
   reset();
 #endif
   if (size > 1) {
-    int part = partition(arr, start, size);
-    quicksortRecursive(arr, start, part - start);
-    quicksortRecursive(arr, part + 1, (size + start) - part - 1);
+    int part = partition(arr, start, size, algoMut);
+    quicksortRecursive(arr, start, part - start, algoMut);
+    quicksortRecursive(arr, part + 1, (size + start) - part - 1, algoMut);
   }
 #ifdef DEBUG
   cyan();
@@ -213,11 +241,12 @@ void quicksortRecursive(SortRectangle **arr, int start, int size) {
 }
 
 // performs the quick sort algorithm
-void quicksort(SortRectangle **arr, int size) {
-  quicksortRecursive(arr, 0, size);
+void quicksort(SortRectangle **arr, int size, sf::Mutex *algoMut) {
+  quicksortRecursive(arr, 0, size, algoMut);
 }
 
-void mergesortRecursive(SortRectangle **a, int index, int size) {
+void mergesortRecursive(SortRectangle **a, int index, int size,
+                        sf::Mutex *algoMut) {
 #ifdef DEBUG
   std::cout << "index: " << index << ", ";
   std::cout << "size: " << size << ", n/2: " << size / 2 << std::endl;
@@ -225,9 +254,9 @@ void mergesortRecursive(SortRectangle **a, int index, int size) {
 
   // check for base cases
   if (size == 1) {
-    a[index]->setActive(1);
+    a[index]->setActive(1, algoMut);
     sf::sleep(DISPLAY_DELAY);
-    a[index]->setActive(0);
+    a[index]->setActive(0, algoMut);
     return;
   } else if (size == 0) {
     return;
@@ -239,8 +268,8 @@ void mergesortRecursive(SortRectangle **a, int index, int size) {
   std::cout << "index: " << index << ", ";
   std::cout << "splitting size: " << size << std::endl;
 #endif
-  SV::mergesortRecursive(a, index, half);
-  SV::mergesortRecursive(a, index + half, size - half);
+  SV::mergesortRecursive(a, index, half, algoMut);
+  SV::mergesortRecursive(a, index + half, size - half, algoMut);
 #ifdef DEBUG
   std::cout << "index: " << index << ", ";
   std::cout << "done splitting size: " << size << std::endl << std::endl;
@@ -251,49 +280,49 @@ void mergesortRecursive(SortRectangle **a, int index, int size) {
   int l, r;
   int mid = index + half;
   for (l = index; l < index + half; l++) {
-    a[l]->setActive(1);
-    a[mid]->setActive(1);
-    if (a[l]->getValue() > a[mid]->getValue()) {
-      swap(&(a[l]), &(a[mid]));
+    a[l]->setActive(1, algoMut);
+    a[mid]->setActive(1, algoMut);
+    if (a[l]->compare(a[mid], algoMut) > 0) {
+      swap(&(a[l]), &(a[mid]), algoMut);
       r = mid;
-      while (r + 1 < index + size && a[r]->getValue() > a[r + 1]->getValue()) {
-        swap(&(a[r]), &(a[r + 1]));
+      while (r + 1 < index + size && a[r]->compare(a[r + 1], algoMut) > 0) {
+        swap(&(a[r]), &(a[r + 1]), algoMut);
         r++;
         sf::sleep(DISPLAY_DELAY);
       }
     } else {
       sf::sleep(DISPLAY_DELAY);
     }
-    a[l]->setActive(0);
-    a[mid]->setActive(0);
+    a[l]->setActive(0, algoMut);
+    a[mid]->setActive(0, algoMut);
   }
 }
 
 // performs the merge sort algorithm
-void mergesort(SortRectangle **arr, int size) {
-  SV::mergesortRecursive(arr, 0, size);
+void mergesort(SortRectangle **arr, int size, sf::Mutex *algoMut) {
+  SV::mergesortRecursive(arr, 0, size, algoMut);
 }
 
 // performs the bubble sort algorithm
-void bubblesort(SortRectangle **arr, int size) {
+void bubblesort(SortRectangle **arr, int size, sf::Mutex *algoMut) {
   for (int i = 0; i < size - 1; i++) {
     for (int j = 0; j < size - 1 - i; j++) {
       // mark rectangles as being referenced
-      arr[j]->setActive(1);
-      arr[j + 1]->setActive(1);
-      if (arr[j]->getValue() > arr[j + 1]->getValue()) {
-        swap(&(arr[j]), &(arr[j + 1]));
+      arr[j]->setActive(1, algoMut);
+      arr[j + 1]->setActive(1, algoMut);
+      if (arr[j]->compare(arr[j + 1], algoMut) > 0) {
+        swap(&(arr[j]), &(arr[j + 1]), algoMut);
       } else {
         sf::sleep(DISPLAY_DELAY);
       }
-      arr[j]->setActive(0);
+      arr[j]->setActive(0, algoMut);
     }
-    arr[size - 1 - i]->setActive(0);
+    arr[size - 1 - i]->setActive(0, algoMut);
   }
 }
 
 // performs the insertion sort algorithm
-void insertionsort(SortRectangle **arr, int size) {
+void insertionsort(SortRectangle **arr, int size, sf::Mutex *algoMut) {
   SortRectangle *temp;
   for (int i = 1; i < size; i++) {  // new insertion
     for (int j = 0; j < i; j++) {   // find where to insert
@@ -306,15 +335,15 @@ void insertionsort(SortRectangle **arr, int size) {
 #endif
 
       // mark rectangles as being referenced
-      arr[i]->setActive(1);
-      arr[j]->setActive(1);
+      arr[i]->setActive(1, algoMut);
+      arr[j]->setActive(1, algoMut);
 
       // swap if necessary
-      if (arr[j]->getValue() > arr[i]->getValue()) {
+      if (arr[j]->compare(arr[i], algoMut) > 0) {
 #ifdef DEBUG
         std::cout << "swap" << std::endl;
 #endif
-        swap(&(arr[j]), &(arr[i]));
+        swap(&(arr[j]), &(arr[i]), algoMut);
       } else {
         sf::sleep(DISPLAY_DELAY);
       }
@@ -327,9 +356,9 @@ void insertionsort(SortRectangle **arr, int size) {
       std::cout << std::endl << std::endl;
 #endif
       // un mark the rectangle
-      arr[j]->setActive(0);
+      arr[j]->setActive(0, algoMut);
     }
-    arr[i]->setActive(0);
+    arr[i]->setActive(0, algoMut);
   }
 }
 }

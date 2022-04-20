@@ -74,10 +74,12 @@ void buttonArraySetActive(SV::Button *arr, bool state) {
 
 // clears the previous set of rectangles and initializes a new set
 void algPrep(SV::SortRectangle **rArr, SV::Button *bArr,
-             sf::Vector2u windowSize) {
+             sf::Vector2u windowSize, sf::Mutex *mut) {
+  mut->lock();
   clearRectArray(rArr);
   initRectArray(rArr, windowSize);
   buttonArraySetActive(bArr, false);
+  mut->unlock();
 }
 
 // thread function to handle selection of sorting algorithms
@@ -105,20 +107,20 @@ void sortThread(SV::SortRectangle **rArr, SV::Button *bArr, sf::Mouse *mouse,
     // determine which algorithm has been selected
     switch (algorithm) {
       case 1:
-        algPrep(rArr, bArr, window->getSize());
-        SV::quicksort(rArr, NUM_RECTS);
+        algPrep(rArr, bArr, window->getSize(), algoMut);
+        SV::quicksort(rArr, NUM_RECTS, algoMut);
         break;
       case 2:
-        algPrep(rArr, bArr, window->getSize());
-        SV::mergesort(rArr, NUM_RECTS);
+        algPrep(rArr, bArr, window->getSize(), algoMut);
+        SV::mergesort(rArr, NUM_RECTS, algoMut);
         break;
       case 3:
-        algPrep(rArr, bArr, window->getSize());
-        SV::bubblesort(rArr, NUM_RECTS);
+        algPrep(rArr, bArr, window->getSize(), algoMut);
+        SV::bubblesort(rArr, NUM_RECTS, algoMut);
         break;
       case 4:
-        algPrep(rArr, bArr, window->getSize());
-        SV::insertionsort(rArr, NUM_RECTS);
+        algPrep(rArr, bArr, window->getSize(), algoMut);
+        SV::insertionsort(rArr, NUM_RECTS, algoMut);
         break;
 
       default:
