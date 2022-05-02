@@ -48,6 +48,34 @@ void initButtonArray(SV::Button *arr, sf::Vector2u windowSize) {
   }
 }
 
+// checks if array is properly sorted in increasing order
+bool validateRectArray(SV::SortRectangle **arr, sf::Mutex *mut) {
+  bool out = true;
+  if (*arr == nullptr) {  // check array exists
+    return out;
+  }
+
+  arr[0]->setActive(1, mut);
+  // run through the loop and check against previous elements
+  for (int i = 1; i < NUM_RECTS; i++) {
+    arr[i]->setActive(1, mut);
+    // check if element is not greater or equal to previous and say its wrong
+    if (arr[i]->compare(arr[i - 1], mut) < 0) {
+      std::cout << "out of order: i:" << i << ", val:" << arr[i]->getValue()
+                << ", i-1:" << i - 1 << ", val:" << arr[i - 1]->getValue()
+                << std::endl;
+      out = false;
+    } else {  // if in order, mark it
+      arr[i - 1]->setActive(2, mut);
+    }
+    sf::sleep(DISPLAY_DELAY);
+  }
+
+  // show the final element as marked
+  arr[NUM_RECTS - 1]->setActive(2, mut);
+  return out;
+}
+
 // deletes the rectangles that were created with new
 void clearRectArray(SV::SortRectangle **arr) {
   for (int i = NUM_RECTS - 1; i >= 0; i--) {
@@ -82,6 +110,15 @@ void algPrep(SV::SortRectangle **rArr, SV::Button *bArr,
   mut->unlock();
 }
 
+// runs the algorithms
+void algRun(void (*alg)(SV::SortRectangle **, int, sf::Mutex *),
+            SV::SortRectangle **rArr, SV::Button *bArr,
+            sf::RenderWindow *window, sf::Mutex *algoMut) {
+  algPrep(rArr, bArr, window->getSize(), algoMut);
+  alg(rArr, NUM_RECTS, algoMut);
+  validateRectArray(rArr, algoMut);
+}
+
 // thread function to handle selection of sorting algorithms
 void sortThread(SV::SortRectangle **rArr, SV::Button *bArr, sf::Mouse *mouse,
                 sf::RenderWindow *window, sf::Vector2i *click,
@@ -107,20 +144,16 @@ void sortThread(SV::SortRectangle **rArr, SV::Button *bArr, sf::Mouse *mouse,
     // determine which algorithm has been selected
     switch (algorithm) {
       case 1:
-        algPrep(rArr, bArr, window->getSize(), algoMut);
-        SV::quicksort(rArr, NUM_RECTS, algoMut);
+        algRun(SV::quicksort, rArr, bArr, window, algoMut);
         break;
       case 2:
-        algPrep(rArr, bArr, window->getSize(), algoMut);
-        SV::mergesort(rArr, NUM_RECTS, algoMut);
+        algRun(SV::mergesort, rArr, bArr, window, algoMut);
         break;
       case 3:
-        algPrep(rArr, bArr, window->getSize(), algoMut);
-        SV::bubblesort(rArr, NUM_RECTS, algoMut);
+        algRun(SV::bubblesort, rArr, bArr, window, algoMut);
         break;
       case 4:
-        algPrep(rArr, bArr, window->getSize(), algoMut);
-        SV::insertionsort(rArr, NUM_RECTS, algoMut);
+        algRun(SV::insertionsort, rArr, bArr, window, algoMut);
         break;
 
       default:
