@@ -25,7 +25,6 @@ SortRectangle::SortRectangle() : sf::RectangleShape(sf::Vector2f(0, 0)) {
 // initializes the values of the rectangle
 void SortRectangle::setValues(sf::Vector2f size, sf::Vector2f pos) {
   setSize(size);
-  active = 0;
   sf::Vector2f temp(pos);
   setPosition(temp);
 }
