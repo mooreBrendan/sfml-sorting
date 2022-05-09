@@ -15,7 +15,6 @@ void scaleRectArray(SV::SortRectangle **arr, sf::Vector2u windowSize) {
   float height = windowSize.y;                    // screen height
   float rWidth = width * .95;  // width of bar with room between
   float rHeight;               // variable to temporarily store bar height
-  int val;
   sf::Vector2f pos;
 
   // perform initialization for each rectangle

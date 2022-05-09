@@ -25,7 +25,6 @@ SortRectangle::SortRectangle() : sf::RectangleShape(sf::Vector2f(0, 0)) {
 // initializes the values of the rectangle
 void SortRectangle::setValues(sf::Vector2f size, sf::Vector2f pos) {
   setSize(size);
-  position = pos.x;
   sf::Vector2f temp(pos);
   setPosition(temp);
 }
@@ -51,7 +50,6 @@ float SortRectangle::getPos() { return getPosition().x; }
 
 // sets the position of the rectangle
 void SortRectangle::setPos(float pos) {
-  position = pos;
   sf::Vector2f temp = getPosition();
   temp.x = pos;
   setPosition(temp);

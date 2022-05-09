@@ -8,7 +8,6 @@ namespace SV {
 class SortRectangle : public sf::RectangleShape {
  private:
   int value;
-  float position;
   int active;
 
  public:
