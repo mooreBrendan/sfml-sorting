@@ -12,7 +12,7 @@ class SortRectangle : public sf::RectangleShape {
 
  public:
   SortRectangle();
-  void swap(SortRectangle *, sf::Mutex *);
+  void swap(SortRectangle *);
   int compare(SortRectangle *, sf::Mutex *);
   void setValues(sf::Vector2f, sf::Vector2f);
   void update();

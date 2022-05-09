@@ -45,8 +45,10 @@ int main() {
   while (window.isOpen()) {
     // reset variables
     sf::Event event;
+    algoMut.lock();
     click.x = 0;
     click.y = 0;
+    algoMut.unlock();
 
     // check events
     while (window.pollEvent(event)) {

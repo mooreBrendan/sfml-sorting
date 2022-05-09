@@ -19,6 +19,7 @@ using namespace SV;
 // class to represent a bar in a sorting algorithm demonstration
 SortRectangle::SortRectangle() : sf::RectangleShape(sf::Vector2f(0, 0)) {
   value = rand() % 100;
+  active = 0;
 }
 
 // initializes the values of the rectangle
@@ -64,10 +65,7 @@ void SortRectangle::print() {
   std::cout << "x:" << x << ",y: " << y << std::endl;
 }
 
-void SortRectangle::swap(SortRectangle *s, sf::Mutex *mut) {
-  // show the rectangles as being swapped
-  setActive(2, mut);
-  s->setActive(2, mut);
+void SortRectangle::swap(SortRectangle *s) {
 #ifdef SWAP_DEBUG
   std::cout << "s1: ";
   print();
@@ -75,13 +73,10 @@ void SortRectangle::swap(SortRectangle *s, sf::Mutex *mut) {
   s->print();
 #endif
 
-  mut->lock();
   // swap their positions on screen
-  float temp = getPosition().x;
+  float temp = getPos();
   setPos(s->getPos());
   s->setPos(temp);
-  mut->unlock();
-  sf::sleep(DISPLAY_DELAY);
 
 #ifdef SWAP_DEBUG
   std::cout << "s1: ";
@@ -89,25 +84,22 @@ void SortRectangle::swap(SortRectangle *s, sf::Mutex *mut) {
   std::cout << "s2: ";
   s->print();
 #endif
-  // set the rectangles as not being swapped
-  setActive(0, mut);
-  s->setActive(0, mut);
 }
 
 // thread safe compare two rectangles (-1:less,0:equal,1:greater)
 int SortRectangle::compare(SortRectangle *other, sf::Mutex *mut) {
-  int out = 0;
   mut->lock();
-  if (value < other->getValue()) {
-    out = -1;
-  } else if (value == other->getValue()) {
-    out = 0;
-  } else {
-    out = 1;
-  }
-
+  int a = value;
+  int b = other->getValue();
   mut->unlock();
-  return out;
+
+  if (a < b) {
+    return -1;
+  } else if (a == other->getValue()) {
+    return 0;
+  } else {
+    return 1;
+  }
 }
 
 int SortRectangle::getValue() { return value; }
@@ -137,12 +129,25 @@ namespace SV {
 
 // swaps the memory addresses of two rectangles
 void swap(SortRectangle **a, SortRectangle **b, sf::Mutex *mut) {
-  (*a)->swap(*b, mut);
+  // mark values being swapped
+  (*a)->setActive(1, mut);
+  (*b)->setActive(1, mut);
+
+  sf::sleep(DISPLAY_DELAY);
+  // swap the indexes in the array
   mut->lock();
+  (*a)->swap(*b);
   SortRectangle *temp = *a;
   *a = *b;
   *b = temp;
   mut->unlock();
+  (*a)->setActive(2, mut);
+  (*b)->setActive(2, mut);
+  sf::sleep(DISPLAY_DELAY);
+
+  // unmark values being swapped
+  (*a)->setActive(0, mut);
+  (*b)->setActive(0, mut);
 }
 
 int findMid(SortRectangle **arr, int a, int b, int c) {
