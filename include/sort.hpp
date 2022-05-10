@@ -5,10 +5,11 @@
 
 namespace SV {
 
+// class to show the rectangles that will be sorted
 class SortRectangle : public sf::RectangleShape {
  private:
-  int value;
-  int active;
+  int value;  // the value of the rectangle to be sorted
+  int active;  // if the rectangle is being referenced
 
  public:
   SortRectangle();
@@ -23,13 +24,14 @@ class SortRectangle : public sf::RectangleShape {
   void print();
 };
 
+// class to display a button with text on it
 class Button : public sf::RectangleShape {
  private:
-  sf::Text text;
-  sf::Font font;
+  sf::Text text;  // the text on the button
+  sf::Font font;  // variable to store the loaded font
 
  public:
-  bool active;
+  bool active;  // whether the button is being shown or not
   Button(std::string);
   sf::Text *getText();
   void setTextFormat();

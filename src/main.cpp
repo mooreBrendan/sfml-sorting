@@ -39,6 +39,7 @@ int main() {
                               &click, &algoMut));
   thread.launch();
 
+  // set max frame rate to limit resource usage
   window.setFramerateLimit(60);
 
   // main loop
@@ -53,9 +54,9 @@ int main() {
     // check events
     while (window.pollEvent(event)) {
       if (event.type == sf::Event::Closed) {  // check if window is closed
-        thread.terminate();
-        clearRectArray(rects);
-        window.close();
+        thread.terminate();                   // stop the sorting thread
+        clearRectArray(rects);                // free allocated data
+        window.close();                       // actually close the window
       } else if (event.type == sf::Event::MouseButtonPressed) {  // check mouse
         if (event.mouseButton.button == sf::Mouse::Left) {  // check left mouse
           algoMut.lock();
@@ -67,13 +68,14 @@ int main() {
 #endif
           algoMut.unlock();
         }
-      } else if (event.type == sf::Event::Resized) {
+      } else if (event.type == sf::Event::Resized) {  // check resize
         sf::Vector2f resize(event.size.width, event.size.height);
 
         // set minimum size
         resize.x = resize.x < MIN_X_SIZE ? MIN_X_SIZE : resize.x;
         resize.y = resize.y < MIN_Y_SIZE ? MIN_Y_SIZE : resize.y;
 
+        // resize the window to min size and center window
         window.setSize(sf::Vector2u(resize.x, resize.y));
         view.setSize(resize);
         view.setCenter(resize.x / 2.0f, resize.y / 2.0f);
@@ -82,6 +84,8 @@ int main() {
         std::cout << std::endl;
 #endif
         window.setView(view);
+
+        // update display objects
         algoMut.lock();
         initButtonArray(buttons, window.getSize());
         scaleRectArray(rects, window.getSize());
@@ -93,6 +97,7 @@ int main() {
       // perform draw
       window.clear();
       algoMut.lock();
+      // draw rectangles
       for (int i = 0; i < NUM_RECTS; i++) {
         if (rects[i] != nullptr) {
           rects[i]->update();
@@ -100,6 +105,8 @@ int main() {
         }
       }
       algoMut.unlock();
+
+      // draw buttons
       for (int i = 0; i < NUM_BUTTONS; i++) {
         if (buttons[i].active) {  // only draw buttons if active
           buttons[i].mouseUpdate(mouse.getPosition(window));  // if mouse over

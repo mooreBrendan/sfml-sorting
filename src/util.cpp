@@ -10,6 +10,7 @@ void initRectArray(SV::SortRectangle **arr, sf::Vector2u windowSize) {
   scaleRectArray(arr, windowSize);
 }
 
+// rescales the rectangles to fit in the window
 void scaleRectArray(SV::SortRectangle **arr, sf::Vector2u windowSize) {
   float width = (float)windowSize.x / NUM_RECTS;  // width of each subsection
   float height = windowSize.y;                    // screen height
@@ -19,8 +20,8 @@ void scaleRectArray(SV::SortRectangle **arr, sf::Vector2u windowSize) {
 
   // perform initialization for each rectangle
   for (int i = 0; i < NUM_RECTS; i++) {
-    if (arr[i] != nullptr) {
-      // get random value for the rectangle height and find width
+    if (arr[i] != nullptr) {  // only update if the rect exists
+      // calculate height and width
       rHeight = ((arr[i]->getValue() * height) / 100) + 1;
       pos.x = i * width;
       pos.y = height - rHeight;
@@ -162,6 +163,7 @@ void sortThread(SV::SortRectangle **rArr, SV::Button *bArr, sf::Mouse *mouse,
   }
 }
 
+// functions to color output in the terminal
 void red() { std::cout << "\033[1;31m"; }
 void green() { std::cout << "\033[1;32m"; }
 void yellow() { std::cout << "\033[1;33m"; }
