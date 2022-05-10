@@ -25,8 +25,7 @@ SortRectangle::SortRectangle() : sf::RectangleShape(sf::Vector2f(0, 0)) {
 // initializes the values of the rectangle
 void SortRectangle::setValues(sf::Vector2f size, sf::Vector2f pos) {
   setSize(size);
-  sf::Vector2f temp(pos);
-  setPosition(temp);
+  setPosition(pos);
 }
 
 // updates the color of the rectangle depending of if its active
@@ -48,7 +47,7 @@ void SortRectangle::update() {
 // returns the x position of the rectangle
 float SortRectangle::getPos() { return getPosition().x; }
 
-// sets the position of the rectangle
+// sets the x position of the rectangle
 void SortRectangle::setPos(float pos) {
   sf::Vector2f temp = getPosition();
   temp.x = pos;
@@ -64,6 +63,7 @@ void SortRectangle::print() {
   std::cout << "x:" << x << ",y: " << y << std::endl;
 }
 
+// swap x position with given rectangle
 void SortRectangle::swap(SortRectangle *s) {
 #ifdef SWAP_DEBUG
   std::cout << "s1: ";
@@ -94,13 +94,14 @@ int SortRectangle::compare(SortRectangle *other, sf::Mutex *mut) {
 
   if (a < b) {
     return -1;
-  } else if (a == other->getValue()) {
+  } else if (a == b) {
     return 0;
   } else {
     return 1;
   }
 }
 
+// returns the random value of the rectangle
 int SortRectangle::getValue() { return value; }
 
 // sets if a rectangle is currently being accessed
@@ -136,10 +137,10 @@ void swap(SortRectangle **a, SortRectangle **b, sf::Mutex *mut) {
   // swap the indexes in the array
   mut->lock();
   (*a)->swap(*b);
-  SortRectangle *temp = *a;
-  *a = *b;
-  *b = temp;
+  std::swap(*a, *b);
   mut->unlock();
+
+  // mark values as swapped
   (*a)->setActive(2, mut);
   (*b)->setActive(2, mut);
   sf::sleep(DISPLAY_DELAY);
@@ -172,6 +173,7 @@ int findMid(SortRectangle **arr, int a, int b, int c) {
 }
 
 int partition(SortRectangle **arr, int start, int size, sf::Mutex *algoMut) {
+  // get partion value
   int pivot = findMid(arr, start, start + (size / 2), start + size - 1);
   int pValue = arr[pivot]->getValue();
   int partionIndex = start;
@@ -184,12 +186,13 @@ int partition(SortRectangle **arr, int start, int size, sf::Mutex *algoMut) {
 #endif
 
   for (int i = start; i < start + size; i++) {  // for each
-    // if less than pivot, swap to left and increase partition
     arr[i]->setActive(1, algoMut);
     algoMut->lock();
+
+    // if less than pivot, swap to left and increase partition
     if (arr[i]->getValue() < pValue) {
       algoMut->unlock();
-      if (i != partionIndex) {  // if already in position
+      if (i != partionIndex) {  // if not already in position
 #ifdef DEBUG
         green();
         std::cout << "swapping: i: " << i << ", pIndex: " << partionIndex
@@ -205,12 +208,16 @@ int partition(SortRectangle **arr, int start, int size, sf::Mutex *algoMut) {
       }
 
       partionIndex++;
-    } else {
+    } else {  // if don't need to swap just let display
       algoMut->unlock();
       sf::sleep(DISPLAY_DELAY);
     }
+
+    // unmark index
     arr[i]->setActive(0, algoMut);
   }
+
+  // swap pivot to partition index
   swap(&(arr[partionIndex]), &(arr[pivot]), algoMut);
 #ifdef DEBUG
   yellow();
@@ -221,6 +228,7 @@ int partition(SortRectangle **arr, int start, int size, sf::Mutex *algoMut) {
   return partionIndex;
 }
 
+// the recursive portion of quick sort
 void quicksortRecursive(SortRectangle **arr, int start, int size,
                         sf::Mutex *algoMut) {
 #ifdef DEBUG
@@ -229,7 +237,7 @@ void quicksortRecursive(SortRectangle **arr, int start, int size,
   std::cout << ",size: " << size << std::endl;
   reset();
 #endif
-  if (size > 1) {
+  if (size > 1) {  // if can be sorted, partition and sort parts
     int part = partition(arr, start, size, algoMut);
     quicksortRecursive(arr, start, part - start, algoMut);
     quicksortRecursive(arr, part + 1, (size + start) - part - 1, algoMut);
@@ -247,6 +255,7 @@ void quicksort(SortRectangle **arr, int size, sf::Mutex *algoMut) {
   quicksortRecursive(arr, 0, size, algoMut);
 }
 
+// the recursive portion of merge sort
 void mergesortRecursive(SortRectangle **a, int index, int size,
                         sf::Mutex *algoMut) {
 #ifdef DEBUG
@@ -264,8 +273,8 @@ void mergesortRecursive(SortRectangle **a, int index, int size,
     return;
   }
 
+  // sort halves
   int half = size / 2;
-// sort halves
 #ifdef DEBUG
   std::cout << "index: " << index << ", ";
   std::cout << "splitting size: " << size << std::endl;
@@ -281,11 +290,16 @@ void mergesortRecursive(SortRectangle **a, int index, int size,
   // merge halves
   int l, r;
   int mid = index + half;
-  for (l = index; l < index + half; l++) {
+  for (l = index; l < index + half; l++) {  // for each in half
+    // mark values being compared
     a[l]->setActive(1, algoMut);
     a[mid]->setActive(1, algoMut);
+
+    // if need to swap
     if (a[l]->compare(a[mid], algoMut) > 0) {
       swap(&(a[l]), &(a[mid]), algoMut);
+
+      // sort swap value into other half
       r = mid;
       while (r + 1 < index + size && a[r]->compare(a[r + 1], algoMut) > 0) {
         swap(&(a[r]), &(a[r + 1]), algoMut);
@@ -295,6 +309,8 @@ void mergesortRecursive(SortRectangle **a, int index, int size,
     } else {
       sf::sleep(DISPLAY_DELAY);
     }
+
+    // unmark sorting rectangles
     a[l]->setActive(0, algoMut);
     a[mid]->setActive(0, algoMut);
   }
@@ -307,18 +323,24 @@ void mergesort(SortRectangle **arr, int size, sf::Mutex *algoMut) {
 
 // performs the bubble sort algorithm
 void bubblesort(SortRectangle **arr, int size, sf::Mutex *algoMut) {
-  for (int i = 0; i < size - 1; i++) {
-    for (int j = 0; j < size - 1 - i; j++) {
+  for (int i = 0; i < size - 1; i++) {        // for each element
+    for (int j = 0; j < size - 1 - i; j++) {  // up until the new index
       // mark rectangles as being referenced
       arr[j]->setActive(1, algoMut);
       arr[j + 1]->setActive(1, algoMut);
+
+      // if need to swap, do so
       if (arr[j]->compare(arr[j + 1], algoMut) > 0) {
         swap(&(arr[j]), &(arr[j + 1]), algoMut);
       } else {
         sf::sleep(DISPLAY_DELAY);
       }
+
+      // unmark older index
       arr[j]->setActive(0, algoMut);
     }
+
+    // unmark final index
     arr[size - 1 - i]->setActive(0, algoMut);
   }
 }
@@ -380,11 +402,14 @@ void insertionsort(SortRectangle **arr, int size, sf::Mutex *algoMut) {
 *****************************************************************************/
 // class to handle a button
 Button::Button(std::string txt) : sf::RectangleShape(sf::Vector2f(0, 0)) {
+  // load font
   if (!font.loadFromFile("Roboto-Regular.ttf")) {
     std::cout << "could not find font file\n" << std::endl;
     throw 20;
   }
   text.setFont(font);
+
+  // setup text formating
   text.setString(txt);
   text.setPosition(getPosition());
   text.setFillColor(sf::Color::Black);
@@ -402,6 +427,7 @@ void Button::setTextFormat() {
   std::cout << "text: x: " << disp.x << ", y: " << disp.y << std::endl;
 #endif
 
+  // move to center of button
   sf::Vector2f temp = getSize();
   sf::FloatRect textBox = text.getLocalBounds();
   temp.x = (temp.x / 2) - (textBox.width / 2);
