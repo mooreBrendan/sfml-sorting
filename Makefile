@@ -23,7 +23,7 @@ debug:
 compile:
 	g++ $(includes) -c $(SRCS)
 link:
-	g++ -o $(EXE_NAME) *.o $(libs) $(links)
+	g++ -o $(EXE_NAME).exe *.o $(libs) $(links)
 
 
 clean:
